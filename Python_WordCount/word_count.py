@@ -28,7 +28,10 @@ def count_words_from_file(filepath):
     return count_words(text)
 
 def save_word_count_to_file(word_count, output_filepath):
+    total_words = sum(word_count.values())  # Calculate total number of words
+
     with open(output_filepath, 'w', encoding='utf-8') as file:
+        file.write(f'Total Words: {total_words}\n\n')  # Write total word count to file
         for word, count in word_count.most_common():
             file.write(f'{word}: {count}\n')
 

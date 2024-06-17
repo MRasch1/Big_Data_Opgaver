@@ -1,5 +1,6 @@
 from pyspark import SparkContext, SparkConf
 import string
+import os
 
 # Initialize SparkContext
 conf = SparkConf().setAppName("WordCount")
@@ -28,12 +29,16 @@ word_count_rdd = lines_rdd.flatMap(process_line) \
                           .map(lambda word: (word, 1)) \
                           .reduceByKey(lambda a, b: a + b)
 
-# Coalesce to a single partition
-word_count_rdd = word_count_rdd.coalesce(1)
+# Collect the RDD to the driver
+word_count_list = word_count_rdd.collect()
 
-# Save the word count results to a text file
-output_filepath = 'Spark_WordCount\output_spark'
-word_count_rdd.saveAsTextFile(output_filepath)
+# Output file path
+output_filepath = 'Spark_WordCount/output_spark.txt'
+
+# Write word count results to the output file
+with open(output_filepath, 'w') as f:
+    for word, count in word_count_list:
+        f.write(f'{word}: {count}\n')
 
 # Stop SparkContext
 sc.stop()
