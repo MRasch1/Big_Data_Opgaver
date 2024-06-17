@@ -1,10 +1,9 @@
-from pyspark.sql import SparkSession
+from pyspark import SparkContext, SparkConf
 import string
 
-# Initialize Spark session
-spark = SparkSession.builder \
-    .appName("Word Count") \
-    .getOrCreate()
+# Initialize SparkContext
+conf = SparkConf().setAppName("WordCount")
+sc = SparkContext(conf=conf)
 
 def process_line(line):
     # Convert the text to lowercase
@@ -18,33 +17,25 @@ def process_line(line):
     words = line.split()
     return words
 
-def count_words(input_filepath, output_filepath):
-    # Read the text file into an RDD
-    text_rdd = spark.sparkContext.textFile(input_filepath)
-    
-    # Process each line to remove punctuation and split into words
-    words_rdd = text_rdd.flatMap(process_line)
-    
-    # Map each word to a tuple (word, 1)
-    word_tuples_rdd = words_rdd.map(lambda word: (word, 1))
-    
-    # Reduce by key to count the occurrences of each word
-    word_count_rdd = word_tuples_rdd.reduceByKey(lambda a, b: a + b)
-    
-    # Sort the results by word frequency in descending order
-    sorted_word_count_rdd = word_count_rdd.sortBy(lambda x: x[1], ascending=False)
-    
-    # Save the results to a text file
-    sorted_word_count_rdd.saveAsTextFile(output_filepath)
+# Input file path
+input_filepath = 'Spark_WordCount/AChristmasCarol_CharlesDickens_English.txt'  # Replace with your input file path
 
-# Input and output file paths
-input_filename = 'Spark_WordCount/AChristmasCarol_CharlesDickens_English.txt'  # Replace with your input file path
-output_filename = 'Spark_WordCount/output_spark.txt'  # Replace with your output file path (directory)
+# Read input file into an RDD
+lines_rdd = sc.textFile(input_filepath)
 
-# Perform the word count
-count_words(input_filename, output_filename)
+# Perform word count
+word_count_rdd = lines_rdd.flatMap(process_line) \
+                          .map(lambda word: (word, 1)) \
+                          .reduceByKey(lambda a, b: a + b)
 
-# Stop the Spark session
-spark.stop()
+# Coalesce to a single partition
+word_count_rdd = word_count_rdd.coalesce(1)
 
-print(f'Word count saved to {output_filename}')
+# Save the word count results to a text file
+output_filepath = 'Spark_WordCount\output_spark'
+word_count_rdd.saveAsTextFile(output_filepath)
+
+# Stop SparkContext
+sc.stop()
+
+print(f'Word count saved to {output_filepath}')
