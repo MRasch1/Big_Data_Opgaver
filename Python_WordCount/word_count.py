@@ -33,8 +33,8 @@ def save_word_count_to_file(word_count, output_filepath):
             file.write(f'{word}: {count}\n')
 
 # Count words from a file
-input_filename = 'Word Count Opgave/AChristmasCarol_CharlesDickens_English.txt'  # Replace with your input file path
-output_filename = 'Word Count Opgave/output.txt'  # Replace with your output file path
+input_filename = 'Python_WordCount/AChristmasCarol_CharlesDickens_English.txt'  # Replace with your input file path
+output_filename = 'Python_WordCount/output.txt'  # Replace with your output file path
 
 word_count = count_words_from_file(input_filename)
 save_word_count_to_file(word_count, output_filename)
